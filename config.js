@@ -204,47 +204,49 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Descargar JSON (subirás al repo)
-  saveBtn.addEventListener('click', async () => {
-    const getBase64 = file =>
-      new Promise(resolve => {
-        if (!file) return resolve('');
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.readAsDataURL(file);
-      });
+  // Descargar JSON (subirás al repo)
+saveBtn.addEventListener('click', async () => {
+  const getBase64 = file =>
+    new Promise(resolve => {
+      if (!file) return resolve('');
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.readAsDataURL(file);
+    });
 
-    const cfg = {
-      whatsapp: inputs.whatsapp.value.trim(),
-      whatsappMessage: inputs.whatsappMessage.value.trim(),
-      phone: inputs.phone.value.trim(),
-      instagram: inputs.instagram.value.trim(),
-      facebook: inputs.facebook.value.trim(),
-      email: inputs.email.value.trim(),
-      bgColor: inputs.bgColor.value,
-      btnColor: inputs.btnColor.value,
-      textColor: inputs.textColor.value,
-      // preferimos preview src si existe (objectURL or previously loaded), sino convertimos a base64
-      logoStore: logoStorePreview.src || await getBase64(inputs.logoStore.files[0] || null),
-      logoSearch: logoSearchPreview.src || await getBase64(inputs.logoSearch.files[0] || null),
-      showWhatsapp: toggles.whatsapp.checked,
-      showTelefono: toggles.telefono.checked,
-      showInstagram: toggles.instagram.checked,
-      showFacebook: toggles.facebook.checked,
-      showEmail: toggles.email.checked,
-      showMap: toggles.map.checked,
-      lat: currentLat,
-      lng: currentLng,
-      address: addressDisplay.textContent
-    };
+  const cfg = {
+    whatsapp: inputs.whatsapp.value.trim(),
+    whatsappMessage: inputs.whatsappMessage.value.trim(),
+    phone: inputs.phone.value.trim(),
+    instagram: inputs.instagram.value.trim(),
+    facebook: inputs.facebook.value.trim(),
+    email: inputs.email.value.trim(),
+    bgColor: inputs.bgColor.value,
+    btnColor: inputs.btnColor.value,
+    textColor: inputs.textColor.value,
+    logoStore: logoStorePreview.src || await getBase64(inputs.logoStore.files[0] || null),
+    logoSearch: logoSearchPreview.src || await getBase64(inputs.logoSearch.files[0] || null),
+    showWhatsapp: toggles.whatsapp.checked,
+    showTelefono: toggles.telefono.checked,
+    showInstagram: toggles.instagram.checked,
+    showFacebook: toggles.facebook.checked,
+    showEmail: toggles.email.checked,
+    showMap: toggles.map.checked,
+    lat: currentLat,
+    lng: currentLng,
+    address: addressDisplay.textContent
+  };
 
-    const blob = new Blob([JSON.stringify(cfg, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'config.json';
-    a.click();
-    URL.revokeObjectURL(a.href);
-    alert('✅ Archivo config.json descargado.\nSubilo al repositorio para aplicar los cambios en GitHub Pages.');
-  });
+  // En celulares: mostrar el JSON en pantalla
+  const jsonText = JSON.stringify(cfg, null, 2);
+  const newWin = window.open();
+  if (newWin) {
+    newWin.document.write("<pre>" + jsonText + "</pre>");
+    newWin.document.title = "config.json";
+  } else {
+    alert("Copia este JSON:\n\n" + jsonText);
+  }
+});
 
   // Función auxiliar: abrir WhatsApp con mensaje guardado (útil para probar)
   window.openWhatsAppWithDefault = (useNumber = true) => {
