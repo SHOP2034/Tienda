@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Edicion de la Tienda</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.1.0/dist/geosearch.css" />
+<link rel="stylesheet" href="configstyle.css" />
+</head>
+
+<body>
+<div id="app">
+  <h1>Edicion de la Tienda</h1>
+
+  <!-- WhatsApp -->
+  <label>WhatsApp:</label>
+  <input type="text" id="whatsappInput" placeholder="Número de WhatsApp" />
+
+  <!-- Mensaje predeterminado -->
+  <label>Mensaje predeterminado para WhatsApp:</label>
+  <textarea id="whatsappMessageInput" placeholder="Hola, estoy interesado/a en sus productos. ¿Podrían darme más información?"></textarea>
+
+  <!-- Teléfono -->
+  <label>Teléfono para llamadas:</label>
+  <input type="text" id="phoneInput" placeholder="Número de teléfono" />
+
+  <!-- Redes -->
+  <label>Instagram:</label>
+  <input type="text" id="instagramInput" placeholder="Link de Instagram" />
+
+  <label>Facebook:</label>
+  <input type="text" id="facebookInput" placeholder="Link de Facebook" />
+
+  <label>Email:</label>
+  <input type="text" id="emailInput" placeholder="Correo electrónico" />
+
+  <!-- Selectores de color -->
+  <div class="select-color">
+    <label for="bgColorInput">Color de fondo:</label>
+    <input type="color" id="bgColorInput" />
+  </div>
+
+  <div class="select-color">
+    <label for="btnColorInput">Color de botones:</label>
+    <input type="color" id="btnColorInput" />
+  </div>
+
+  <div class="select-color">
+    <label for="textColorInput">Color de texto:</label>
+    <input type="color" id="textColorInput" />
+  </div>
+
+  <!-- Logos agrupados -->
+  <div class="logos-row">
+    <div class="logo-block">
+      <label for="logoStoreInput">Logo Tienda:</label>
+      <div class="logo-container" id="logoStoreContainer">
+        <img id="logoStorePreview" src="" alt="Logo Tienda" />
+        <input type="file" id="logoStoreInput" accept="image/*" />
+        <span class="edit-btn">✏️</span>
+      </div>
+    </div>
+
+    <div class="logo-block">
+      <label for="logoSearchInput">Logo Buscador:</label>
+      <div class="logo-container" id="logoSearchContainer">
+        <img id="logoSearchPreview" src="" alt="Logo Buscador" />
+        <input type="file" id="logoSearchInput" accept="image/*" />
+        <span class="edit-btn">✏️</span>
+      </div>
+    </div>
+</div>
+
+  <!-- Toggles -->
+  <div class="toggle-group">
+    <label><input type="checkbox" id="showWhatsapp" /> Mostrar WhatsApp</label>
+    <label><input type="checkbox" id="showTelefono" /> Mostrar Teléfono</label>
+    <label><input type="checkbox" id="showInstagram" /> Mostrar Instagram</label>
+    <label><input type="checkbox" id="showFacebook" /> Mostrar Facebook</label>
+    <label><input type="checkbox" id="showEmail" /> Mostrar Email</label>
+    <label><input type="checkbox" id="showMap" /> Mostrar Mapa</label>
+  </div>
+
+  <!-- Mapa -->
+  <label>Ubicación:</label>
+  <div id="addressDisplay">Cargando dirección...</div>
+  <div id="mapConfig"></div>
+
+  <!-- Botón Guardar -->
+  <button id="saveBtn">Guardar Configuración</button>
+</div>
+
+<!-- Scripts -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-geosearch@3.1.0/dist/bundle.min.js"></script>
+<script src="config.js"></script>
+
+</body>
+</html>
