@@ -24,17 +24,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const addressDisplay = document.getElementById('addressDisplay');
   const saveBtn = document.getElementById('saveBtn');
+  const saveLocalBtn = document.getElementById('saveLocalBtn');
 
   const logoStorePreview = document.getElementById('logoStorePreview');
-  const logoStoreEditBtn = document.querySelector('#logoStoreContainer .edit-btn');
   const logoSearchPreview = document.getElementById('logoSearchPreview');
+  const logoStoreEditBtn = document.querySelector('#logoStoreContainer .edit-btn');
   const logoSearchEditBtn = document.querySelector('#logoSearchContainer .edit-btn');
 
-  // Valores de lat/lng por defecto (si no hay guardado)
+  // Valores de lat/lng por defecto
   let currentLat = parseFloat(localStorage.getItem('lat')) || -32.0;
   let currentLng = parseFloat(localStorage.getItem('lng')) || -64.0;
 
-  // Cargar valores previos desde localStorage (si existen)
+  // Cargar valores previos desde localStorage (opcional)
   inputs.whatsapp.value = localStorage.getItem('whatsappNumber') || '';
   inputs.phone.value = localStorage.getItem('phoneNumber') || '';
   inputs.instagram.value = localStorage.getItem('instagramLink') || '';
@@ -46,9 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
   logoStorePreview.src = localStorage.getItem('logoStore') || '';
   logoSearchPreview.src = localStorage.getItem('logoSearch') || '';
   addressDisplay.textContent = localStorage.getItem('address') || 'Ubicación no definida';
-  inputs.whatsappMessage.value = localStorage.getItem('whatsappMessage') || 'Hola, estoy interesado/a en sus productos. ¿Podrían darme más información?';
+  inputs.whatsappMessage.value = localStorage.getItem('whatsappMessage') || '';
 
-  // Cargar toggles
   try {
     toggles.whatsapp.checked = localStorage.getItem('showWhatsapp') === 'true';
     toggles.telefono.checked = localStorage.getItem('showTelefono') === 'true';
@@ -162,12 +162,8 @@ document.addEventListener('DOMContentLoaded', () => {
     return URL.createObjectURL(file);
   };
 
-  // --- ¡¡BLOQUE DE REPOSICIONAMIENTO ELIMINADO!! ---
-  // (Aquí es donde estaba todo el código problemático)
-  // -----------------------------------------------
-
-  // Guardar configuración
-  saveBtn.addEventListener('click', async () => {
+  // Guardar local (para pruebas rápidas sin subir JSON)
+  saveLocalBtn.addEventListener('click', async () => {
     try {
       const logoStoreURL = await uploadImage(inputs.logoStore.files ? inputs.logoStore.files[0] : null);
       const logoSearchURL = await uploadImage(inputs.logoSearch.files ? inputs.logoSearch.files[0] : null);
@@ -183,11 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('lat', currentLat);
       localStorage.setItem('lng', currentLng);
       localStorage.setItem('address', addressDisplay.textContent.trim());
-
-      // Guardar mensaje de WhatsApp
       localStorage.setItem('whatsappMessage', inputs.whatsappMessage.value.trim());
 
-      // Guardar toggles
       try {
         localStorage.setItem('showWhatsapp', toggles.whatsapp.checked);
         localStorage.setItem('showTelefono', toggles.telefono.checked);
@@ -203,15 +196,57 @@ document.addEventListener('DOMContentLoaded', () => {
       if (logoSearchURL) localStorage.setItem('logoSearch', logoSearchURL);
 
       localStorage.setItem('configUpdate', Date.now());
-
-      alert('✅ Configuración guardada');
+      alert('✅ Guardado localmente (localStorage). Ahora abrí index.html en otra pestaña para probar la sincronización.');
     } catch (err) {
-      console.error('Error guardando configuración:', err);
-      alert('✖ Error al guardar la configuración. Revisa la consola.');
+      console.error('Error guardando localmente:', err);
+      alert('✖ Error al guardar localmente. Revisa la consola.');
     }
   });
 
-  // Función auxiliar: abrir WhatsApp con mensaje guardado
+  // Descargar JSON (subirás al repo)
+  saveBtn.addEventListener('click', async () => {
+    const getBase64 = file =>
+      new Promise(resolve => {
+        if (!file) return resolve('');
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.readAsDataURL(file);
+      });
+
+    const cfg = {
+      whatsapp: inputs.whatsapp.value.trim(),
+      whatsappMessage: inputs.whatsappMessage.value.trim(),
+      phone: inputs.phone.value.trim(),
+      instagram: inputs.instagram.value.trim(),
+      facebook: inputs.facebook.value.trim(),
+      email: inputs.email.value.trim(),
+      bgColor: inputs.bgColor.value,
+      btnColor: inputs.btnColor.value,
+      textColor: inputs.textColor.value,
+      // preferimos preview src si existe (objectURL or previously loaded), sino convertimos a base64
+      logoStore: logoStorePreview.src || await getBase64(inputs.logoStore.files[0] || null),
+      logoSearch: logoSearchPreview.src || await getBase64(inputs.logoSearch.files[0] || null),
+      showWhatsapp: toggles.whatsapp.checked,
+      showTelefono: toggles.telefono.checked,
+      showInstagram: toggles.instagram.checked,
+      showFacebook: toggles.facebook.checked,
+      showEmail: toggles.email.checked,
+      showMap: toggles.map.checked,
+      lat: currentLat,
+      lng: currentLng,
+      address: addressDisplay.textContent
+    };
+
+    const blob = new Blob([JSON.stringify(cfg, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'config.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    alert('✅ Archivo config.json descargado.\nSubilo al repositorio para aplicar los cambios en GitHub Pages.');
+  });
+
+  // Función auxiliar: abrir WhatsApp con mensaje guardado (útil para probar)
   window.openWhatsAppWithDefault = (useNumber = true) => {
     const rawPhone = inputs.whatsapp.value.trim();
     const phone = rawPhone.replace(/^\+/, '').replace(/\D/g, '');

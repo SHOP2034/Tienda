@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Tienda</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
   body { margin:0; padding:0; font-family: Arial, sans-serif; transition: background 0.3s; }
   #header { text-align:center; padding:15px; }
@@ -11,120 +12,50 @@
   #logoSearch { width:60px; height:60px; object-fit:cover; border-radius:10px; display:block; margin:10px auto; }
   #buttons { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin:10px 0; }
   .btn { padding:10px 15px; border:none; border-radius:8px; font-size:16px; cursor:pointer; color:#fff; text-decoration:none; display:inline-block; }
-  #hours { text-align:center; margin:10px 0; font-size:14px; }
   #map { height:300px; border-radius:10px; margin:10px; }
-  .section { background:#fff; padding:15px; margin:10px; border-radius:10px; box-shadow:0 0 5px rgba(0,0,0,0.2); }
 </style>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
 <div id="header">
   <img id="logoStore" src="" alt="Logo Tienda" />
   <img id="logoSearch" src="" alt="Logo Buscador" />
 </div>
-
 <div id="buttons"></div>
-<div id="hours"></div>
 <div id="map"></div>
-
-<div id="promos" class="section">Promociones</div>
-<div id="news" class="section">Novedades</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  // Cargar configuración
-  const config = {
-    whatsapp: localStorage.getItem('whatsappNumber'),
-    phone: localStorage.getItem('phoneNumber'),
-    instagram: localStorage.getItem('instagramLink'),
-    facebook: localStorage.getItem('facebookLink'),
-    email: localStorage.getItem('emailAddress'),
-    hours: localStorage.getItem('hours'),
-    logoStore: localStorage.getItem('logoStore'),
-    logoSearch: localStorage.getItem('logoSearch'),
-    showWhatsapp: localStorage.getItem('showWhatsapp')==='true',
-    showInstagram: localStorage.getItem('showInstagram')==='true',
-    showFacebook: localStorage.getItem('showFacebook')==='true',
-    showEmail: localStorage.getItem('showEmail')==='true',
-    showMap: localStorage.getItem('showMap')==='true',
-    showPromos: localStorage.getItem('showPromos')==='true',
-    showNews: localStorage.getItem('showNews')==='true',
-    bgColor: localStorage.getItem('bgColor') || '#ffffff',
-    btnColor: localStorage.getItem('btnColor') || '#28a745',
-    textColor: localStorage.getItem('textColor') || '#000000',
-    lat: parseFloat(localStorage.getItem('lat')) || -32.0,
-    lng: parseFloat(localStorage.getItem('lng')) || -64.0
-  };
+fetch('config.json')
+  .then(r => r.ok ? r.json() : {})
+  .then(cfg => {
+    document.body.style.background = cfg.bgColor || '#fff';
 
-  document.body.style.background = config.bgColor;
+    if (cfg.logoStore) document.getElementById('logoStore').src = cfg.logoStore;
+    if (cfg.logoSearch) document.getElementById('logoSearch').src = cfg.logoSearch;
 
-  // Logos
-  if(config.logoStore) document.getElementById('logoStore').src = config.logoStore;
-  if(config.logoSearch) document.getElementById('logoSearch').src = config.logoSearch;
+    const makeBtn = (text, url) => {
+      const a = document.createElement('a');
+      a.className = 'btn';
+      a.textContent = text;
+      a.href = url;
+      a.style.background = cfg.btnColor || '#28a745';
+      a.style.color = cfg.textColor || '#fff';
+      a.target = '_blank';
+      document.getElementById('buttons').appendChild(a);
+    };
 
-  // Botones
-  const buttonsDiv = document.getElementById('buttons');
+    if (cfg.showWhatsapp && cfg.whatsapp) makeBtn('WhatsApp', `https://wa.me/${cfg.whatsapp.replace(/\D/g,'')}`);
+    if (cfg.showInstagram && cfg.instagram) makeBtn('Instagram', cfg.instagram);
+    if (cfg.showFacebook && cfg.facebook) makeBtn('Facebook', cfg.facebook);
+    if (cfg.showEmail && cfg.email) makeBtn('Email', `mailto:${cfg.email}`);
+    if (cfg.showTelefono && cfg.phone) makeBtn('Teléfono', `tel:${cfg.phone}`);
 
-  if(config.showWhatsapp && config.whatsapp){
-    const a = document.createElement('a');
-    a.href = `https://wa.me/${config.whatsapp.replace(/\D/g,'')}`;
-    a.className='btn';
-    a.style.background=config.btnColor; a.style.color=config.textColor;
-    a.textContent='WhatsApp';
-    a.target='_blank';
-    buttonsDiv.appendChild(a);
-  }
-
-  if(config.showInstagram && config.instagram){
-    const a = document.createElement('a');
-    a.href=config.instagram;
-    a.className='btn';
-    a.style.background=config.btnColor; a.style.color=config.textColor;
-    a.textContent='Instagram';
-    a.target='_blank';
-    buttonsDiv.appendChild(a);
-  }
-
-  if(config.showFacebook && config.facebook){
-    const a = document.createElement('a');
-    a.href=config.facebook;
-    a.className='btn';
-    a.style.background=config.btnColor; a.style.color=config.textColor;
-    a.textContent='Facebook';
-    a.target='_blank';
-    buttonsDiv.appendChild(a);
-  }
-
-  if(config.showEmail && config.email){
-    const a = document.createElement('a');
-    a.href=`mailto:${config.email}`;
-    a.className='btn';
-    a.style.background=config.btnColor; a.style.color=config.textColor;
-    a.textContent='Email';
-    buttonsDiv.appendChild(a);
-  }
-
-  // Horario
-  if(config.hours) document.getElementById('hours').textContent = `Horario: ${config.hours}`;
-
-  // Secciones
-  document.getElementById('promos').style.display = config.showPromos ? 'block' : 'none';
-  document.getElementById('news').style.display = config.showNews ? 'block' : 'none';
-
-  // Mapa
-  if(config.showMap){
-    const map = L.map('map').setView([config.lat, config.lng], 15);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
-    L.marker([config.lat, config.lng]).addTo(map);
-  } else {
-    document.getElementById('map').style.display='none';
-  }
-
-  // 🔄 Escuchar cambios desde config.html y recargar automáticamente
-  window.addEventListener("storage", (event) => {
-    if (event.key === "configUpdate") {
-      console.log("🔁 Configuración actualizada, recargando tienda...");
-      location.reload();
+    if (cfg.showMap && cfg.lat && cfg.lng) {
+      const map = L.map('map').setView([cfg.lat, cfg.lng], 15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+      L.marker([cfg.lat, cfg.lng]).addTo(map).bindPopup(cfg.address || 'Ubicación');
+    } else {
+      document.getElementById('map').style.display = 'none';
     }
   });
 </script>

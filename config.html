@@ -71,7 +71,7 @@
         <span class="edit-btn">✏️</span>
       </div>
     </div>
-</div>
+  </div>
 
   <!-- Toggles -->
   <div class="toggle-group">
@@ -84,12 +84,17 @@
   </div>
 
   <!-- Mapa -->
-  <label>Ubicación:</label>
+  <h3>Ubicación</h3>
   <div id="addressDisplay">Cargando dirección...</div>
-  <div id="mapConfig"></div>
+  <div id="mapConfig" style="height:300px; margin:10px 0;"></div>
 
   <!-- Botón Guardar -->
-  <button id="saveBtn">Guardar Configuración</button>
+  <div class="buttons-row">
+    <button id="saveBtn">Descargar config.json</button>
+    <button id="saveLocalBtn">Guardar localmente (solo navegador)</button>
+  </div>
+
+  <p class="hint">Después de descargar <code>config.json</code> subilo al repositorio para que GitHub Pages sirva la configuración públicamente.</p>
 </div>
 
 <!-- Scripts -->
